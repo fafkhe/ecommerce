@@ -38,4 +38,9 @@ export default {
       token,
     });
   },
+  me: async (req, res, next) => {
+    const thisUser = await authorizeUser(req.user);
+
+    res.status(200).json(thisUser);
+  },
 };
