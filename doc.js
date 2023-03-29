@@ -105,6 +105,30 @@ const endpoints = [
     },
   },
 
+  // create admin
+
+  {
+    endpoint: "/auth/create-admin",
+    method: "POST",
+    body: {
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+    },
+    requireAdminAuth: true,
+    possibleErrors: [
+      {
+        error: "unathorized",
+      },
+      {
+        error: "bad request: insufficient input",
+      },
+    ],
+    response: {
+      msg: String,
+    },
+  },
+
   // admin me
 
   {
