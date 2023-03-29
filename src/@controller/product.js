@@ -10,7 +10,6 @@ export default {
     const { name, price, description, quantity, imgUrl } = req.body;
     if(!name || !price|| !description || !quantity ) throw new AppError("bad request: insufficient input")
     const thisUser = await authorizeAdmin(req.user);
-    if (!thisUser) throw new AppError("you can not create product", 403);
 
     const newProduct =  await Product.create({
       name,

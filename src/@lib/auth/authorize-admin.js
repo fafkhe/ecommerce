@@ -13,7 +13,7 @@ export default async (user) => {
     { __v: 0, password: 0 }
   );
 
-  if (!thisUser) throw new AppError("unathorized", 401);
+  if (!thisUser) throw new AppError("forbidden", 403);
 
   return thisUser;
 };
