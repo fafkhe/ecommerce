@@ -4,9 +4,6 @@ import { genSaltSync, hashSync, compareSync } from "bcrypt";
 import AppError from "./../@lib/server/appError";
 import jwt from "jsonwebtoken";
 
-
-
-
 dotenv.config();
 
 const userSchema = Schema(
@@ -22,12 +19,16 @@ const userSchema = Schema(
       type: String,
       default: null,
     },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
   {
     timestamps: true,
   }
 );
-
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -47,7 +48,6 @@ userSchema.methods = {
   _createToken: function () {
     return jwt.sign({ _id: this._id }, process.env.JWT_SECRET);
   },
-}
-
+};
 
 export default mongoose.model("User", userSchema);

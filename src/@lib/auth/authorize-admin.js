@@ -1,14 +1,15 @@
-
 import AppError from "../server/appError";
 import Models from "../../@models";
 
+
 const { User } = Models;
+
 
 export default async (user) => {
   if (!user || !user._id) throw new AppError("unathorized", 401);
 
   const thisUser = await User.findOne(
-    { id: id, role: "user" },
+    { _id: user._id, role: "admin" },
     { __v: 0, password: 0 }
   );
 

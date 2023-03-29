@@ -1,4 +1,5 @@
 import authorizeUser from "../@lib/auth/authorize-user";
+import authorizeAdmin from "../@lib/auth/authorize-admin";
 import Models from "../@models";
 import AppError from "../@lib/server/appError";
 
@@ -43,4 +44,22 @@ export default {
 
     res.status(200).json(thisUser);
   },
+
+  createAdmin: async (req, res, next) => {
+   await authorizeAdmin(req.user);
+    const { name, email, imgUrl, password } = req.body;
+    if (!name || !email || !password)
+      throw new AppError("bad request: insufficient input");
+    const newAdmin = await User.create({
+      name,
+      email,
+      password,
+      role: "admin"
+    });
+    res.status(200).json({
+      msg: "success",
+      data: newAdmin
+    })
+  },
+
 };
