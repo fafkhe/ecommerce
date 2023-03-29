@@ -46,7 +46,7 @@ export default {
   },
 
   createAdmin: async (req, res, next) => {
-   await authorizeAdmin(req.user);
+    await authorizeAdmin(req.user);
     const { name, email, imgUrl, password } = req.body;
     if (!name || !email || !password)
       throw new AppError("bad request: insufficient input");
@@ -54,12 +54,16 @@ export default {
       name,
       email,
       password,
-      role: "admin"
+      role: "admin",
     });
     res.status(200).json({
       msg: "success",
-      data: newAdmin
-    })
+      data: newAdmin,
+    });
   },
 
+  adminMe: async (req, res, next) => {
+    const thisUser = await authorizeAdmin(req.user);
+    res.status(200).json(thisUser);
+  },
 };
