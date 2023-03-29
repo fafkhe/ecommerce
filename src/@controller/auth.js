@@ -15,10 +15,24 @@ export default {
       password: "1111",
     });
 
-    // console.log(thisUser);
     const token = thisUser._createToken();
-    // console.log(token);
     await thisUser.save();
+
+    res.status(201).json({
+      token,
+    });
+  },
+
+  login: async (req, res, next) => {
+    const { email, password } = req.body;
+    if (!password || !email)
+      throw new AppError("bad request: insufficient input", 400);
+
+    const thisUser = await User.findOne({ email });
+    if (!thisUser) throw new AppError("bad request: no such user found!", 404);
+
+    thisUser._checkPassword(password);
+    const token = thisUser._createToken();
 
     res.status(201).json({
       token,
