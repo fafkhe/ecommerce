@@ -186,7 +186,7 @@ const endpoints = [
   // edit product by admin
 
   {
-    endpoint: "/product/edit",
+    endpoint: "/product/edit/:_id",
     method: "POST",
     body: {
       _id: String,

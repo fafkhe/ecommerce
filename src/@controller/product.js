@@ -10,7 +10,7 @@ export default {
     const { name, price, description, quantity, imgUrl } = req.body;
     if (!name || !price || !description || !quantity)
       throw new AppError("bad request: insufficient input");
-    const thisUser = await authorizeAdmin(req.user);
+    const thisAdmin = await authorizeAdmin(req.user);
 
     const newProduct = await Product.create({
       name,
@@ -23,10 +23,11 @@ export default {
       data: newProduct,
     });
   },
+
   editProduct: async (req, res, next) => {
     const { name, price, description, quantity, imgUrl } = req.body;
 
-    const [thisUser, thisProduct] = await Promise.all([
+    const [thisAdmin, thisProduct] = await Promise.all([
       authorizeAdmin(req.user),
       Product.findById(req.params._id),
     ]);
@@ -53,7 +54,8 @@ export default {
       },
     });
   },
-  getallProduct: async (req, res, next) => {
+
+  getallProducts: async (req, res, next) => {
     const page = req.query.page || 0;
     const limit = req.query.limit || 10;
 
@@ -72,6 +74,19 @@ export default {
         total,
         result,
       },
+    });
+  },
+
+  
+  singleProduct: async (req, res, next) => {
+    const singleProduct = await Product.findById(req.params._id);
+
+    if (!singleProduct)
+      throw new AppError("no product found with that ID", 404);
+
+    res.status(200).json({
+      status: "success",
+      data: singleProduct,
     });
   },
 };

@@ -7,8 +7,8 @@ const router = Router();
 
 router.get("/", catchAsync(productController.getallProduct))
 router.post("/create-product", catchAsync(productController.createProduct));
-router.post("/:_id", catchAsync(productController.editProduct));
+// router.post("/:_id", catchAsync(productController.editProduct));
 router.get("/all-product", catchAsync(productController.allProduct));
-router.get("/single-product", catchAsync(productController.singleProduct));
+router.get("/:_id", catchAsync(productController.singleProduct));
 
 export default router;
