@@ -21,8 +21,3 @@ const ProductSchema = Schema(
 
 export default mongoose.model("Product", ProductSchema);
 
-// price: String,
-//       quantity: String,
-//       description: String,
-//       isDisplayed: Boolean,
-//       keywords: [String],

@@ -1,5 +1,6 @@
 import authRouter from "./auth-router";
 import product from "./product-router";
+import Cart from "./cart-router"
 
 export default (app) => {
   app.get("/", (req, res) => {
@@ -8,6 +9,7 @@ export default (app) => {
 
   app.use("/auth", authRouter);
   app.use("/product", product);
+  app.use("/cart",Cart)
 
   app.all("*", (req, res, next) => {
     res.send("<h1>  404! </h1>");

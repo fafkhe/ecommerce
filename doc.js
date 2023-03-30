@@ -295,6 +295,9 @@ const endpoints = [
         error: "no such product found",
       },
       {
+        error: "you already add this product to cart"
+      },
+      {
         error: "the maximum product is 10 , you can not add !",
       },
     ],

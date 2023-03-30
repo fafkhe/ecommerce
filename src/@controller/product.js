@@ -77,12 +77,11 @@ export default {
     });
   },
 
-  
   singleProduct: async (req, res, next) => {
     const singleProduct = await Product.findById(req.params._id);
 
     if (!singleProduct)
-      throw new AppError("no product found with that ID", 404);
+      throw new AppError("bad request: no such product found", 404);
 
     res.status(200).json({
       status: "success",

@@ -8,7 +8,7 @@ export default async (user) => {
   if (!user || !user._id) throw new AppError("unathorized", 401);
 
   const thisUser = await User.findOne(
-    { id: id, role: "user" },
+    { _id: user._id, role: "user" },
     { __v: 0, password: 0 }
   );
 

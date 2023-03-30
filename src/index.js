@@ -1,4 +1,5 @@
 import runServer from "./@lib/server/run-server";
+import "./@controller/cart";
 
 globalThis.flr = (args) => {
   console.log("\x1b[41m", args);

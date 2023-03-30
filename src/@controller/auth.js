@@ -3,7 +3,7 @@ import authorizeAdmin from "../@lib/auth/authorize-admin";
 import Models from "../@models";
 import AppError from "../@lib/server/appError";
 
-const { User } = Models;
+const { User, Cart } = Models;
 
 export default {
   signUp: async (req, res, next) => {
@@ -18,6 +18,9 @@ export default {
 
     const token = thisUser._createToken();
     await thisUser.save();
+    await Cart.create({
+      userId: String(thisUser._id),
+    });
 
     res.status(201).json({
       token,
