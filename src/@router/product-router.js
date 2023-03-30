@@ -4,6 +4,8 @@ import catchAsync from "../@lib/catchAsync";
 
 const router = Router();
 
+
+router.get("/", catchAsync(productController.getallProduct))
 router.post("/create-product", catchAsync(productController.createProduct));
 router.post("/:_id", catchAsync(productController.editProduct));
 router.get("/all-product", catchAsync(productController.allProduct));

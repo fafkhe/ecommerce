@@ -49,8 +49,29 @@ export default {
     res.status(200).json({
       status: "success",
       data: {
-        updateProduct
-      }
-    })
+        updateProduct,
+      },
+    });
+  },
+  getallProduct: async (req, res, next) => {
+    const page = req.query.page || 0;
+    const limit = req.query.limit || 10;
+
+    const findOption = {};
+
+    const [total, result] = await Promise.all([
+      Product.find(findOption).countDocuments(),
+      Product.find(findOption)
+        .skip(page * limit)
+        .limit(limit),
+    ]);
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        total,
+        result,
+      },
+    });
   },
 };

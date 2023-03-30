@@ -207,9 +207,7 @@ const endpoints = [
       {
         error: "unathorized",
       },
-      {
-        error: "bad request: insufficient input",
-      },
+
       {
         error: "bad request: no such product found",
       },
