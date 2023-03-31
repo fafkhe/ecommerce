@@ -331,7 +331,7 @@ const endpoints = [
     },
   },
 
-  // change cart
+  // change cart's quantity
 
   {
     endpoint: "/cart",

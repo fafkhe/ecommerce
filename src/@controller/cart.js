@@ -4,6 +4,24 @@ import authorizeUser from "../@lib/auth/authorize-user";
 
 const { Cart, Product } = Models;
 
+const appendProduct = async (carts) => {
+  const preproductIds = carts.map((item) => item.productId);
+  const productIds = [...new Set(preproductIds)];
+  const theseProducts = await Product.find({ _id: { $in: productIds } });
+
+  const cache = {};
+
+  theseProducts.forEach((product) => (cache[String(product._id)] = product));
+
+  for (const thiscart of carts) {
+    const thisProduct = cache[thiscart.productId];
+
+    thiscart.product = thisProduct;
+  }
+
+  return carts;
+};
+
 export default {
   addtoCart: async (req, res, next) => {
     const [thisUser, thisProduct] = await Promise.all([
@@ -21,7 +39,8 @@ export default {
       (cartItem) => cartItem.productId === productId
     );
 
-    if (alreadyAdded) throw new AppError("you already add this product to cart", 400);
+    if (alreadyAdded)
+      throw new AppError("you already add this product to cart", 400);
 
     if (thiscart.items.length >= 10)
       throw new AppError("the maximum product is 10 , you can not add !", 400);
@@ -30,6 +49,19 @@ export default {
     });
     res.status(200).json({
       msg: "ok",
+    });
+  },
+
+  getCart: async (req, res, next) => {
+    const thisUser = await authorizeUser(req.user);
+    const thisCart = await Cart.findOne({
+      userId: String(thisUser._id),
+    }).lean();
+
+    const result = await appendProduct(thisCart.items);
+
+    res.status(200).json({
+      result,
     });
   },
 };
