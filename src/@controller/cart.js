@@ -76,7 +76,6 @@ export default {
   },
 
   changeTheQuantity: async (req, res, next) => {
-   
     try {
       const { quantity: newQuantity } = req.body;
       if (newQuantity % 1 !== 0)
@@ -90,26 +89,48 @@ export default {
         userId: String(thisUser._id),
       });
       const thisproduct = req.body._id;
-  
+
       const Index = thisCart.items.findIndex(
         (item) => item.productId === thisproduct
       );
-  
+
       if (Index === -1)
         throw new AppError("your cart does'nt contain this product", 404);
-  
+
       thisCart.items[Index].quantity = newQuantity;
       await thisCart.save();
-  
+
       res.status(200).json({
         msg: "ok",
       });
-      
     } catch (error) {
-      if (error.name === "CastError") throw new AppError("no such product exist!")
-      throw(error)
+      if (error.name === "CastError")
+        throw new AppError("no such product exist!");
+      throw error;
     }
+  },
+  removeProduct: async (req, res, next) => {
+    const [thisUser, thisProduct] = await Promise.all([
+      authorizeUser(req.user),
+      Product.findById(req.body._id),
+    ]);
+    if (!thisProduct) throw new AppError("no such product exist!");
+    const thiscart = await Cart.findOne({ userId: String(thisUser._id) });
 
+    const thisproduct = req.body._id;
 
+    const Index = thiscart.items.findIndex(
+      (item) => item.productId === thisproduct
+    );
+    if (Index === -1)
+      throw new AppError("your cart does'nt contain this product");
+
+    await Cart.findByIdAndUpdate(thiscart._id, {
+      $pull: { items: { productId: thisproduct } },
+    });
+
+    res.status(200).json({
+      msg: "ok",
+    });
   },
 };
