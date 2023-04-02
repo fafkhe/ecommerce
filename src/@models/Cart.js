@@ -5,11 +5,15 @@ const CartSchema = Schema(
     userId: {
       type: String,
     },
-   
+
     items: [
       {
-        productId: String, 
-        quantity: Number,
+        productId: String,
+        quantity: {
+          type: Number,
+          min: [1, "a valid quantity should be between 1-10"],
+          max: 5,
+        },
       },
     ],
   },

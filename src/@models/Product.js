@@ -4,10 +4,9 @@ import dotenv from "dotenv";
 const ProductSchema = Schema(
   {
     name: String,
-
-    price: String,
+    price: Number,
     description: String,
-    quantity: String,
+    quantity: Number,
     isDisplayed: Boolean,
     imgurl: {
       type: String,
@@ -19,5 +18,7 @@ const ProductSchema = Schema(
   }
 );
 
-export default mongoose.model("Product", ProductSchema);
 
+
+
+export default mongoose.model("Product", ProductSchema);

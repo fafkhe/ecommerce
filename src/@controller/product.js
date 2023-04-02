@@ -55,7 +55,7 @@ export default {
     });
   },
 
-  getallProducts: async (req, res, next) => {
+  allProducts: async (req, res, next) => {
     const page = req.query.page || 0;
     const limit = req.query.limit || 10;
 

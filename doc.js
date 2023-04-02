@@ -278,7 +278,7 @@ const endpoints = [
   // add to cart
 
   {
-    endpoint: "/cart",
+    endpoint: "/cart/get",
     method: "POST",
     requireAuth: true,
     requireAdminAuth: false,
@@ -309,8 +309,8 @@ const endpoints = [
   // remove from cart
 
   {
-    endpoint: "/cart",
-    method: "DELETE",
+    endpoint: "/cart/remove",
+    method: "POST",
     requireAuth: true,
     requireAdminAuth: false,
 

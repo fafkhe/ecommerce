@@ -47,6 +47,7 @@ export default {
     await Cart.findByIdAndUpdate(thiscart._id, {
       $push: { items: { productId: productId, quantity: 1 } },
     });
+
     res.status(200).json({
       msg: "ok",
     });
@@ -59,9 +60,19 @@ export default {
     }).lean();
 
     const result = await appendProduct(thisCart.items);
+    console.log(result);
+
+    let totalPrice = 0;
+    for (const thisProduct of result) {
+      totalPrice += thisProduct.product.price * thisProduct.quantity;
+    }
 
     res.status(200).json({
-      result,
+      data: {
+        items: result,
+        totalPrice,
+      },
     });
   },
+
 };
