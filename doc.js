@@ -335,7 +335,7 @@ const endpoints = [
 
   {
     endpoint: "/cart",
-    method: "PATCH",
+    method: "POST",
     requireAuth: true,
     requireAdminAuth: false,
 

@@ -11,8 +11,8 @@ const CartSchema = Schema(
         productId: String,
         quantity: {
           type: Number,
-          min: [1, "a valid quantity should be between 1-10"],
-          max: 5,
+          min: [1, "quantity should be an integer between 1-10"],
+          max: [10, "quantity should be an integer between 1-10"],
         },
       },
     ],
