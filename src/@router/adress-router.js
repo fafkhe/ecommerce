@@ -6,7 +6,7 @@ const router = Router();
 
 router.post("/", catchAsync(addressController.addAdress));
 router.get("/", catchAsync(addressController.getMyAddresses));
-// router.patch("/", catchAsync(addressController.deleteAdress));
+router.delete("/", catchAsync(addressController.deleteMyAddress));
 
 
 export default router;
