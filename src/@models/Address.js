@@ -9,7 +9,7 @@ const AddressSchema = Schema(
     geo: { lat: Number, lon: Number },
     deleted: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   {

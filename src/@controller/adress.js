@@ -22,12 +22,12 @@ export default {
     });
   },
 
-  getAddress: async (req, res, next) => {
+  getMyAddresses: async (req, res, next) => {
     const thisUser = await authorizeUser(req.user);
     const page = req.query.page || 0;
     const limit = req.query.limit || 2;
 
-    const findOption = { userId: String(thisUser._id) };
+    const findOption = { userId: String(thisUser._id), deleted: false };
 
     const [total, result] = await Promise.all([
       Address.find(findOption).countDocuments(),
@@ -37,7 +37,6 @@ export default {
     ]);
 
     res.status(200).json({
-      msg: "ok",
       data: {
         total,
         result,
