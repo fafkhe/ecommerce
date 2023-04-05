@@ -9,7 +9,6 @@ export default {
   signUp: async (req, res, next) => {
     if (!req.body.name || !req.body.email)
       throw new AppError("bad request: insufficient input");
-    console.log(req.body.name);
     const thisUser = new User({
       name: req.body.name,
       email: req.body.email,

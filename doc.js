@@ -30,6 +30,13 @@ const Cart = {
   ],
 };
 
+const Address = {
+  text: String,
+  name: String,
+  phone: String,
+  geo: { lat: Number, lon: Number },
+};
+
 const endpoints = [
   // Auth section
   // SignUp
@@ -295,7 +302,7 @@ const endpoints = [
         error: "no such product found",
       },
       {
-        error: "you already add this product to cart"
+        error: "you already add this product to cart",
       },
       {
         error: "the maximum product is 10 , you can not add !",
@@ -358,5 +365,99 @@ const endpoints = [
     response: {
       msg: String,
     },
+  },
+
+  //Adress section
+  {
+    endpoint: "/address",
+    method: "POST",
+    requireAuth: true,
+
+    body: {
+      text: String,
+      name: String,
+      phone: String,
+      geo: { lat: Number, lon: Number },
+    },
+
+    possibleErrors: [
+      {
+        error: "unathorized",
+      },
+      {
+        error: "insufficient fields",
+      },
+    ],
+    response: {
+      msg: "ok",
+    },
+  },
+  {
+    endpoint: "/address",
+    method: "GET",
+    requireAuth: true,
+
+    possibleErrors: [
+      {
+        error: "unathorized",
+      },
+    ],
+    response: {
+      data: [Address],
+    },
+  },
+
+  {
+    endpoint: "/address",
+    method: "DELETE",
+    requireAuth: true,
+    possibleErrors: [
+      {
+        error: "unathorized",
+      },
+
+      {
+        error: "forbiden",
+      },
+      {
+        error: "bad request: no such address exist!",
+      },
+    ],
+
+    body: {
+      addressId: String,
+    },
+
+    response: {
+      msg: "ok",
+    },
+  },
+
+  // buy
+
+  {
+    endpoint: "/checkout",
+    method: "POST",
+    requireAuth: true,
+
+    body: {
+      addressId: String,
+    },
+
+    possibleErrors: [
+      {
+        error: "unathorized",
+      },
+      {
+        error: "bad request: no such addreess exists!",
+      },
+      {
+        error: "bad request: your cart is empty!!! ",
+      },
+      {
+        error: "bad request: we have not enougth product in our store",
+      },
+      
+    ],
   },
 ];
