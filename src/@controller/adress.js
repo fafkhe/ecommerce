@@ -43,4 +43,22 @@ export default {
       },
     });
   },
+
+  deleteMyAddress: async (req, res, next) => {
+    const [thisUser, thisAddress] = await Promise.all([
+      authorizeUser(req.user),
+      Address.findById(req.body._id),
+    ]);
+
+    if (!thisAddress)
+      throw new AppError("bad request: no such address exist!", 404);
+    if (thisAddress.userId !== String(thisUser._id))
+      throw new AppError("forbiden", 403);
+    await Address.findByIdAndUpdate(thisAddress._id, {
+      $set: { deleted: true },
+    });
+    res.status(200).json({
+      msg: "ok",
+    });
+  },
 };
