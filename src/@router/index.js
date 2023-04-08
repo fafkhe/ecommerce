@@ -2,6 +2,7 @@ import authRouter from "./auth-router";
 import product from "./product-router";
 import Cart from "./cart-router";
 import Address from "./adress-router";
+import Checkout from "./checkout-router";
 
 export default (app) => {
   app.get("/", (req, res) => {
@@ -12,6 +13,7 @@ export default (app) => {
   app.use("/product", product);
   app.use("/cart", Cart);
   app.use("/address", Address);
+  app.use("/checkout", Checkout);
 
   app.all("*", (req, res, next) => {
     res.send("<h1>  404! </h1>");

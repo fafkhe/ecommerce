@@ -17,10 +17,10 @@ const InvoiceSchema = Schema(
       type: String,
       enum: ["paid", "boxed", "sent", "delivered"],
     },
-    code: String,
+
     boxedby: { type: String, default: null }, //
     transmitter: { type: String, default: null },
-    shipper: { type: String, default: null },
+    shipment: { type: String, default: null },
   },
   {
     timestamps: true,

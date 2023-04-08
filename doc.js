@@ -37,6 +37,8 @@ const Address = {
   geo: { lat: Number, lon: Number },
 };
 
+const Invoice = {};
+
 const endpoints = [
   // Auth section
   // SignUp
@@ -457,7 +459,84 @@ const endpoints = [
       {
         error: "bad request: we have not enougth product in our store",
       },
-      
     ],
+    response: {
+      msg: "ok",
+      invoiceId: String,
+    },
+  },
+
+  // Invoice
+
+  {
+    endpoint: "/invoice",
+    method: "GET",
+    requireAdminAuth: true,
+
+    query: {
+      status: String,
+      page: Number,
+      limit: Number,
+    },
+    possibleErrors: [
+      {
+        error: "forbiden",
+      },
+    ],
+    response: {
+      data: [Invoice],
+      total: Number,
+    },
+  },
+
+  {
+    endpoint: "/invoice/my-invoices",
+    method: "GET",
+    requireAuth: true,
+    query: {
+      page: Number,
+      limit: Number,
+      status: String,
+    },
+    possibleErrors: [
+      {
+        error: "forbiden",
+      },
+    ],
+  },
+
+  {
+    endpoints: "/invoice/admin/:_id",
+    method: "GET",
+    requireAdminAuth: true,
+
+    possibleErrors: [
+      {
+        error: "forbidden",
+      },
+      {
+        error: "no such invoice found",
+      },
+    ],
+    response: {
+      data: Invoice,
+    },
+  },
+  {
+    endpoints: "/invoice/user/:_id",
+    method: "GET",
+    requireAuth: true,
+
+    possibleErrors: [
+      {
+        error: "no such invoivce exists! ",
+      },
+      {
+        error: "forbidden ",
+      },
+    ],
+    response: {
+      data: Invoice,
+    },
   },
 ];
