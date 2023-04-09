@@ -73,7 +73,18 @@ export default {
     const theseInvoices = await Invoice.find({ userId: thisUser._id });
 
     res.status(200).json({
-     data: theseInvoices,
+      data: theseInvoices,
+    });
+  },
+  getSingleInvoiceByUser: async (req, res, next) => {
+    const [thisUser, SingleInvoice] = await Promise.all([
+      authorizeUser(req.user),
+      Invoice.findById(req.params._id),
+    ]);
+    if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
+
+    res.status(200).json({
+      data: SingleInvoice,
     });
   },
 };
