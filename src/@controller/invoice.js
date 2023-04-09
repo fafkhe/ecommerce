@@ -70,10 +70,23 @@ export default {
   },
   getMyInvoices: async (req, res, next) => {
     const thisUser = await authorizeUser(req.user);
-    const theseInvoices = await Invoice.find({ userId: thisUser._id });
+    const page = req.query.page || 0;
+    const limit = req.query.limit || 2;
+
+    const findOption = { userId: String(thisUser._id) };
+
+    const [total, result] = await Promise.all([
+      Invoice.find(findOption).countDocuments(),
+      Invoice.find(findOption)
+        .skip(page * limit)
+        .limit(limit),
+    ]);
 
     res.status(200).json({
-      data: theseInvoices,
+      data: {
+        total,
+        result,
+      },
     });
   },
   getSingleInvoiceByUser: async (req, res, next) => {
