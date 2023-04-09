@@ -68,4 +68,12 @@ export default {
       InvoiceId: String(newInvoice._id),
     });
   },
+  getMyInvoices: async (req, res, next) => {
+    const thisUser = await authorizeUser(req.user);
+    const theseInvoices = await Invoice.find({ userId: thisUser._id });
+
+    res.status(200).json({
+     data: theseInvoices,
+    });
+  },
 };
