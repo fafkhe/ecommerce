@@ -43,7 +43,7 @@ export default {
       items: clone,
       totalPrice: clone.reduce((acc, cur) => acc + cur.totalPrice, 0),
       addressId: String(thisAddress._id),
-      status: "paid",
+      status: "boxed",
     });
     console.log("clone", clone);
 
@@ -72,8 +72,12 @@ export default {
     const thisUser = await authorizeUser(req.user);
     const page = req.query.page || 0;
     const limit = req.query.limit || 2;
+    const status = req.query.status || null;
 
     const findOption = { userId: String(thisUser._id) };
+    if (status) {
+      findOption.status = status;
+    }
 
     const [total, result] = await Promise.all([
       Invoice.find(findOption).countDocuments(),
@@ -94,6 +98,7 @@ export default {
       authorizeUser(req.user),
       Invoice.findById(req.params._id),
     ]);
+    
     if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
 
     res.status(200).json({
