@@ -1,6 +1,7 @@
 import Models from "@models";
 import AppError from "../@lib/server/appError";
 import authorizeUser from "../@lib/auth/authorize-user";
+import authorizeAdmin from "../@lib/auth/authorize-admin";
 
 const { Address, Invoice, Cart, Product } = Models;
 
@@ -107,5 +108,46 @@ export default {
       data: SingleInvoice,
     });
   },
-  
+  getAllInvoicesByAdmin: async (req, res, next) => {
+    const thisAdmin = await authorizeAdmin(req.user);
+    const page = req.query.page || 0;
+    const limit = req.query.limit || 10;
+    const status = req.query.status || null;
+    const user = req.query.userId;
+
+    const findOption = {};
+    if (status) {
+      findOption.status = status;
+    }
+    if (user) {
+      findOption.userId = user;
+    }
+
+    const [total, result] = await Promise.all([
+      Invoice.find(findOption).countDocuments(),
+      Invoice.find(findOption)
+        .skip(page * limit)
+        .limit(limit),
+    ]);
+
+    res.status(200).json({
+      data: {
+        total,
+        result,
+      },
+    });
+  },
+
+  getSingleInvoiceByAdmin: async (req, res, next) => {
+    const [thisAdmin, SingleInvoice] = await Promise.all([
+      authorizeAdmin(req.user),
+      Invoice.findById(req.params._id),
+    ]);
+
+    if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
+
+    res.status(200).json({
+      data: SingleInvoice,
+    });
+  },
 };
