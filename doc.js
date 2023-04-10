@@ -534,9 +534,7 @@ const endpoints = [
       {
         error: "forbidden ",
       },
-      {
-        error
-      }
+     
     ],
     response: {
       data: Invoice,

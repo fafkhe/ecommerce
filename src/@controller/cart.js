@@ -123,7 +123,7 @@ export default {
       (item) => item.productId === thisproduct
     );
     if (Index === -1)
-      throw new AppError("your cart does'nt contain this product");
+      throw new AppError("your cart does'nt contain this product",404);
 
     await Cart.findByIdAndUpdate(thiscart._id, {
       $pull: { items: { productId: thisproduct } },

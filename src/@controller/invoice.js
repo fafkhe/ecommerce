@@ -98,11 +98,14 @@ export default {
       authorizeUser(req.user),
       Invoice.findById(req.params._id),
     ]);
-    
+
+    if (SingleInvoice._id !== String(thisUser._id))
+      throw new AppError("forbidden", 403);
     if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
 
     res.status(200).json({
       data: SingleInvoice,
     });
   },
+  
 };
