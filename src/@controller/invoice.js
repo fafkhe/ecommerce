@@ -77,15 +77,15 @@ export default {
     const status = req.query.status || null;
 
     const junctionBox = {
-      'new': { createdAt: 1 },
-      'old': { createdAt: -1 },
-      'price': { totalPrice: 1}
-    }
+      new: { createdAt: 1 },
+      old: { createdAt: -1 },
+      price: { totalPrice: 1 },
+    };
 
-    let x = req.query.sort || null
+    let x = req.query.sort || null;
 
     const findOption = {
-      userId: String(thisUser._id)
+      userId: String(thisUser._id),
     };
 
     if (status) {
@@ -95,7 +95,7 @@ export default {
     const [total, result] = await Promise.all([
       Invoice.find(findOption).countDocuments(),
       Invoice.find(findOption)
-        .sort(junctionBox[x] || {createdAt: 1})
+        .sort(junctionBox[x] || { createdAt: 1 })
         .skip(page * limit)
         .limit(limit),
     ]);

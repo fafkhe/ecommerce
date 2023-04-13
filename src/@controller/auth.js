@@ -5,6 +5,24 @@ import AppError from "../@lib/server/appError";
 
 const { User, Cart } = Models;
 
+const permissionsMaker = (arr) => {
+  const obj = {
+    master: 1,
+    userControll: 1,
+    productControll: 1,
+    boxing: 1,
+    sending: 1,
+    shipping: 1,
+  };
+  const result = [];
+
+  arr.forEach((item) => {
+    if (item in obj) result.push(item);
+  });
+
+  return [...new Set(result)];
+};
+
 export default {
   signUp: async (req, res, next) => {
     if (!req.body.name || !req.body.email)
@@ -48,15 +66,22 @@ export default {
   },
 
   createAdmin: async (req, res, next) => {
-    await authorizeAdmin(req.user);
-    const { name, email, imgUrl, password } = req.body;
-    if (!name || !email || !password)
+    await authorizeAdmin(req.user, "userControll");
+    const { name, email, imgUrl, password, permissions } = req.body;
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !permissions ||
+      !Array.isArray(permissions)
+    )
       throw new AppError("bad request: insufficient input");
     const newAdmin = await User.create({
       name,
       email,
       password,
       role: "admin",
+      permissions: permissionsMaker(permissions),
     });
     res.status(200).json({
       msg: "success",

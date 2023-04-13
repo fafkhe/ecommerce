@@ -10,7 +10,8 @@ export default {
     const { name, price, description, quantity, imgUrl } = req.body;
     if (!name || !price || !description || !quantity)
       throw new AppError("bad request: insufficient input");
-    const thisAdmin = await authorizeAdmin(req.user);
+
+    await authorizeAdmin(req.user, "productControll");
 
     const newProduct = await Product.create({
       name,
@@ -27,10 +28,11 @@ export default {
   editProduct: async (req, res, next) => {
     const { name, price, description, quantity, imgUrl } = req.body;
 
-    const [thisAdmin, thisProduct] = await Promise.all([
-      authorizeAdmin(req.user),
+    const [thisProduct] = await Promise.all([
       Product.findById(req.params._id),
+      authorizeAdmin(req.user, "productControll"),
     ]);
+
     if (!thisProduct) throw new AppError("bad request: no such product found");
 
     const updateProduct = await Product.findByIdAndUpdate(

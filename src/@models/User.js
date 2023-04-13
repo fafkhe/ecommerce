@@ -24,6 +24,18 @@ const userSchema = Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    permissions: [String],
+    /*
+      list of allowed permissions 
+      [
+        'master',
+        'userControll',
+        'productControll',
+        'boxing',
+        'sending',
+        'shipping',
+      ]
+    */
   },
   {
     timestamps: true,
