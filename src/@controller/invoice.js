@@ -172,4 +172,22 @@ export default {
 
     await junctionBox[requester.role]();
   },
+
+  boxOrder: async (req, res, next) => {
+    const [thisInvoice, thisAdmin] = await Promise.all([
+      Invoice.findOne({ _id: req.body.InvoiceId, status: "paid" }),
+      authorizeAdmin(req.user, "boxing"),
+    ]);
+    if (!thisInvoice) throw new AppError("no such invoice found", 404);
+
+    await Invoice.findByIdAndUpdate(thisInvoice._id, {
+      $set: {
+        status: "boxed",
+        boxedby: String(thisAdmin._id),
+        boxDate: new Date().toISOString(),
+      },
+    });
+
+    res.status(200).json({ msg: "ok" });
+  },
 };

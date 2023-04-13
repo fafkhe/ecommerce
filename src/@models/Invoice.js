@@ -19,7 +19,9 @@ const InvoiceSchema = Schema(
     },
 
     boxedby: { type: String, default: null }, //
-    transmitter: { type: String, default: null },
+    boxDate: { type: Date, default: null },
+    sender: { type: String, default: null },
+    sendDate: { type: Date, default: null },
     shipment: { type: String, default: null },
   },
   {
