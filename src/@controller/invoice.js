@@ -2,6 +2,7 @@ import Models from "@models";
 import AppError from "../@lib/server/appError";
 import authorizeUser from "../@lib/auth/authorize-user";
 import authorizeAdmin from "../@lib/auth/authorize-admin";
+import decideUser from "@lib/auth/decide-user";
 
 const { Address, Invoice, Cart, Product } = Models;
 
@@ -75,7 +76,18 @@ export default {
     const limit = req.query.limit || 2;
     const status = req.query.status || null;
 
-    const findOption = { userId: String(thisUser._id) };
+    const junctionBox = {
+      'new': { createdAt: 1 },
+      'old': { createdAt: -1 },
+      'price': { totalPrice: 1}
+    }
+
+    let x = req.query.sort || null
+
+    const findOption = {
+      userId: String(thisUser._id)
+    };
+
     if (status) {
       findOption.status = status;
     }
@@ -83,6 +95,7 @@ export default {
     const [total, result] = await Promise.all([
       Invoice.find(findOption).countDocuments(),
       Invoice.find(findOption)
+        .sort(junctionBox[x] || {createdAt: 1})
         .skip(page * limit)
         .limit(limit),
     ]);
@@ -92,36 +105,19 @@ export default {
         total,
         result,
       },
-    });
-  },
-  getSingleInvoiceByUser: async (req, res, next) => {
-    const [thisUser, SingleInvoice] = await Promise.all([
-      authorizeUser(req.user),
-      Invoice.findById(req.params._id),
-    ]);
-
-    if (SingleInvoice._id !== String(thisUser._id))
-      throw new AppError("forbidden", 403);
-    if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
-
-    res.status(200).json({
-      data: SingleInvoice,
     });
   },
   getAllInvoicesByAdmin: async (req, res, next) => {
-    const thisAdmin = await authorizeAdmin(req.user);
+    await authorizeAdmin(req.user);
     const page = req.query.page || 0;
     const limit = req.query.limit || 10;
     const status = req.query.status || null;
-    const user = req.query.userId;
+    const userId = req.query.userId;
 
     const findOption = {};
-    if (status) {
-      findOption.status = status;
-    }
-    if (user) {
-      findOption.userId = user;
-    }
+
+    if (status) findOption.status = status;
+    if (userId) findOption.userId = userId;
 
     const [total, result] = await Promise.all([
       Invoice.find(findOption).countDocuments(),
@@ -137,17 +133,43 @@ export default {
       },
     });
   },
+  getSingleInvoice: async (req, res, next) => {
+    const requester = await decideUser(req.user);
 
-  getSingleInvoiceByAdmin: async (req, res, next) => {
-    const [thisAdmin, SingleInvoice] = await Promise.all([
-      authorizeAdmin(req.user),
-      Invoice.findById(req.params._id),
-    ]);
+    const junctionBox = {
+      user: async () => {
+        const [SingleInvoice] = await Promise.all([
+          Invoice.findById(req.params._id),
+        ]);
 
-    if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
+        if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
 
-    res.status(200).json({
-      data: SingleInvoice,
-    });
+        if (SingleInvoice.userId !== String(thisUser._id))
+          throw new AppError("forbidden", 403);
+
+        res.status(200).json({
+          data: SingleInvoice,
+        });
+      },
+      admin: async () => {
+        const [SingleInvoice] = await Promise.all([
+          Invoice.findById(req.params._id),
+        ]);
+
+        if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
+
+        res.status(200).json({
+          data: SingleInvoice,
+        });
+      },
+    };
+
+    if (
+      !junctionBox[requester.role] ||
+      typeof junctionBox[requester.role] !== "function"
+    )
+      throw new AppError("zxc", 400);
+
+    await junctionBox[requester.role]();
   },
 };
