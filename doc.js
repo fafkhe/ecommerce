@@ -50,9 +50,7 @@ const endpoints = [
       name: String,
       password: String,
     },
-    requireAuth: false,
-    requireAdminAuth: false,
-
+    auth: "none",
     possibleErrors: [
       {
         error: "bad request: insufficient input",
@@ -77,8 +75,7 @@ const endpoints = [
       email: String,
       password: String,
     },
-    requireAuth: false,
-    requireAdminAuth: false,
+    auth: "none",
     possibleErrors: [
       {
         error: "bad request: insufficient input",
@@ -100,9 +97,7 @@ const endpoints = [
     endpoint: "/auth/me",
     method: "POST",
     body: {},
-
-    requireAuth: true,
-    requireAdminAuth: false,
+    auth: "user",
     possibleErrors: [
       {
         error: " unathorized: you are not login",
@@ -119,12 +114,13 @@ const endpoints = [
   {
     endpoint: "/auth/create-admin",
     method: "POST",
+    auth: "admin",
+    permission: "userControll",
     body: {
       name: req.body.name,
       email: req.body.email,
       password: req.body.password,
     },
-    requireAdminAuth: true,
     possibleErrors: [
       {
         error: "unathorized",
@@ -145,8 +141,8 @@ const endpoints = [
     method: "POST",
     body: {},
 
-    requireAuth: true,
-    requireAdminAuth: true,
+    auth: "admin",
+
     possibleErrors: [
       {
         error: "you have no permission to access this page",
@@ -165,6 +161,8 @@ const endpoints = [
   {
     endpoint: "/product/add",
     method: "POST",
+    permission: "productControll",
+    auth: "admin",
     body: {
       name: String,
       imgUrl: String,
@@ -174,9 +172,6 @@ const endpoints = [
       isDisplayed: Boolean,
       keywords: [String],
     },
-    requireAuth: false,
-    requireAdminAuth: true,
-
     possibleErrors: [
       {
         error: "unathorized",
@@ -196,6 +191,8 @@ const endpoints = [
 
   {
     endpoint: "/product/edit/:_id",
+    permission: "productControll",
+    auth: "admin",
     method: "POST",
     body: {
       _id: String,
@@ -209,8 +206,6 @@ const endpoints = [
         keywords: [String],
       },
     },
-    requireAuth: false,
-    requireAdminAuth: true,
 
     possibleErrors: [
       {
@@ -234,8 +229,8 @@ const endpoints = [
     endpoint: "/product",
     method: "GET",
     query: { text: String, page: String, limit: String },
-    requireAuth: false,
-    requireAdminAuth: false,
+
+    auth: "none",
 
     response: {
       msg: String,
@@ -248,9 +243,7 @@ const endpoints = [
   {
     endpoint: "/product/:_id",
     method: "GET",
-    requireAuth: false,
-    requireAdminAuth: false,
-
+    auth: "none",
     possibleErrors: [
       {
         error: "bad request: no such product found",
@@ -269,9 +262,7 @@ const endpoints = [
   {
     endpoint: "/cart",
     method: "GET",
-    requireAuth: true,
-    requireAdminAuth: false,
-
+    auth: "user",
     possibleErrors: [
       {
         error: "unathorized",
@@ -285,17 +276,13 @@ const endpoints = [
   },
 
   // add to cart
-
   {
-    endpoint: "/cart/get",
+    endpoint: "/cart",
     method: "POST",
-    requireAuth: true,
-    requireAdminAuth: false,
-
+    auth: "user",
     body: {
       productId: String,
     },
-
     possibleErrors: [
       {
         error: "unathorized",
@@ -318,10 +305,9 @@ const endpoints = [
   // remove from cart
 
   {
-    endpoint: "/cart/remove",
-    method: "POST",
-    requireAuth: true,
-    requireAdminAuth: false,
+    endpoint: "/cart",
+    method: "DELETE",
+    auth: "user",
 
     body: {
       productId: String,
@@ -344,10 +330,8 @@ const endpoints = [
 
   {
     endpoint: "/cart",
-    method: "POST",
-    requireAuth: true,
-    requireAdminAuth: false,
-
+    method: "PATCH",
+    auth: "user",
     body: {
       productId: String,
       quantity: Number,
@@ -373,7 +357,7 @@ const endpoints = [
   {
     endpoint: "/address",
     method: "POST",
-    requireAuth: true,
+    auth: "user",
 
     body: {
       text: String,
@@ -397,7 +381,7 @@ const endpoints = [
   {
     endpoint: "/address",
     method: "GET",
-    requireAuth: true,
+    auth: "user",
 
     possibleErrors: [
       {
@@ -412,7 +396,8 @@ const endpoints = [
   {
     endpoint: "/address",
     method: "DELETE",
-    requireAuth: true,
+    auth: "user",
+
     possibleErrors: [
       {
         error: "unathorized",
@@ -440,12 +425,10 @@ const endpoints = [
   {
     endpoint: "/checkout",
     method: "POST",
-    requireAuth: true,
-
+    auth: "user",
     body: {
       addressId: String,
     },
-
     possibleErrors: [
       {
         error: "unathorized",
@@ -471,8 +454,7 @@ const endpoints = [
   {
     endpoint: "/invoice",
     method: "GET",
-    requireAdminAuth: true,
-
+    auth: "admin",
     query: {
       status: String,
       page: Number,
@@ -492,7 +474,8 @@ const endpoints = [
   {
     endpoint: "/invoice/my-invoices",
     method: "GET",
-    requireAuth: true,
+    auth: "user",
+
     query: {
       page: Number,
       limit: Number,
@@ -506,10 +489,9 @@ const endpoints = [
   },
 
   {
-    endpoints: "/invoice/admin/:_id",
+    endpoints: "/invoice/:_id",
     method: "GET",
-    requireAdminAuth: true,
-
+    auth: "both",
     possibleErrors: [
       {
         error: "forbidden",
@@ -522,22 +504,72 @@ const endpoints = [
       data: Invoice,
     },
   },
+
+  //Step handler
+
   {
-    endpoints: "/invoice/user/:_id",
-    method: "GET",
-    requireAuth: true,
+    endpoints: "/invoice/box",
+    method: "POST",
+    auth: "admin",
+    permission: "boxing",
+
+    body: {
+      invoiceId: String,
+    },
+    possibleError: [
+      {
+        error: "forbidden",
+      },
+      {
+        error: "no such invoice found",
+      },
+    ],
+    response: {
+      msg: "ok",
+    },
+  },
+  {
+    endpoints: "/invoice/send",
+    method: "POST",
+    auth: "admin",
+    permission: "send",
+
+    body: {
+      invoiceId: String,
+    },
 
     possibleErrors: [
       {
-        error: "no such invoivce exists! ",
+        error: "forbidden",
       },
-      {
-        error: "forbidden ",
-      },
-     
+      { error: "no such invoice found" },
     ],
     response: {
-      data: Invoice,
+      msg: "ok",
+    },
+  },
+  {
+    endpoints: "/invoice/delivered",
+    method: "POST",
+    auth: "admin",
+    permission: "delivered",
+
+    body: {
+      invoiceId: String,
+      code: String,
+    },
+
+    possibleErrors: [
+      {
+        error: "forbidden",
+      },
+      { error: "no such invoice found" },
+      {
+        error: "wrong code",
+      },
+    ],
+    response: {
+      msg: "ok",
     },
   },
 ];
