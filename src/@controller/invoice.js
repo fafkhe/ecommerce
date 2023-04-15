@@ -52,7 +52,7 @@ const serializeInvoice = async (invoices, userId) => {
       const projection = amIhim ? undefined : { code: 0 };
 
       const thisShipment = await Shipment.findById(
-        invoice.shipment,
+        invoice.shipmentId,
         projection
       );
 
@@ -292,11 +292,38 @@ export default {
         status: "sent",
         sender: String(thisAdmin._id),
         sendDate: new Date().toISOString(),
-        shipment: String(thisShipment._id),
+        shipmentId: String(thisShipment._id),
       },
     });
 
     res.status.json({
+      msg: "ok",
+    });
+  },
+
+  deliveredOrder: async (req, res, next) => {
+    const [thisAdmin, thisInvoice] = await Promise.all([
+      authorizeAdmin(req.user, "shipping"),
+      Invoice.findOne({ _id: req.body.InvoiceId, status: "sent" }),
+    ]);
+
+    if (!thisInvoice) throw new AppError("no such invoice found", 404);
+    const thisShipment = await Shipment.findById(thisInvoice.shipmentId);
+
+    if (thisShipment.shipper !== String(thisAdmin._id))
+      throw new AppError("forbidden", 403);
+
+    if (req.body.code !== thisShipment.code)
+      throw new AppError("bad request: wrong code!!!!", 400);
+    await Promise.all([
+      Invoice.findByIdAndUpdate(thisInvoice._id, {
+        $set: { status: "delivered" },
+      }),
+      Shipment.findByIdAndUpdate(thisInvoice._id, {
+        $set: { status: "delivered", code: null },
+      }),
+    ]);
+    res.status(200).json({
       msg: "ok",
     });
   },

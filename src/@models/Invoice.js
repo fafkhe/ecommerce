@@ -13,7 +13,7 @@ const InvoiceSchema = Schema(
     ],
     totalPrice: Number,
     addressId: String,
-    
+
     status: {
       type: String,
       enum: ["paid", "boxed", "sent", "delivered"],
@@ -23,7 +23,7 @@ const InvoiceSchema = Schema(
     boxDate: { type: Date, default: null },
     sender: { type: String, default: null },
     sendDate: { type: Date, default: null },
-    shipment: { type: String, default: null },
+    shipmentId: { type: String, default: null },
   },
   {
     timestamps: true,
