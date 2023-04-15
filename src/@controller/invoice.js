@@ -3,8 +3,70 @@ import AppError from "../@lib/server/appError";
 import authorizeUser from "../@lib/auth/authorize-user";
 import authorizeAdmin from "../@lib/auth/authorize-admin";
 import decideUser from "@lib/auth/decide-user";
+import generateNumericString from "../@lib/utils/generateNumericString";
 
-const { Address, Invoice, Cart, Product } = Models;
+const { Address, Invoice, Cart, Product, Shipment } = Models;
+
+const serializeInvoice = async (invoices, userId) => {
+  const thisAddressId = invoices.map((item) => item.addressId);
+  const addressIds = [...new Set(thisAddressId)];
+  const theseAddress = await Address.find({ _id: { $in: addressIds } });
+  const AddressCache = {};
+  const ProductCache = {};
+  theseAddress.forEach(
+    (address) => (AddressCache[String(address._id)] = address)
+  );
+
+  for (const invoice of invoices) {
+    const thisAddress = AddressCache[invoice.addressId];
+
+    invoice.address = thisAddress;
+  }
+  const thesePro = invoices.map((item) => item.items);
+
+  const newProList = thesePro.flat();
+
+  const arrOfIds = [];
+
+  for (let i = 0; i < newProList.length; i++) {
+    arrOfIds.push(newProList[i].productId);
+  }
+  const theseProducts = await Product.find(
+    { _id: { $in: arrOfIds } },
+    { __v: 0, quantity: 0 }
+  );
+
+  theseProducts.forEach(
+    (product) => (ProductCache[String(product._id)] = product)
+  );
+  for (const invoice of invoices) {
+    invoice.items.forEach((item) => {
+      item.product = ProductCache[item.productId];
+    });
+  }
+
+  for (const invoice of invoices) {
+    const amIhim = userId === invoice.userId;
+
+    if (invoice.shipment) {
+      const projection = amIhim ? undefined : { code: 0 };
+
+      const thisShipment = await Shipment.findById(
+        invoice.shipment,
+        projection
+      );
+
+      invoice.shipment = thisShipment;
+    }
+  }
+
+  return invoices;
+};
+
+const serializeSingleInvoide = async (invoice) => {
+  const x = await serializeInvoice([invoice]);
+  return x[0];
+};
 
 export default {
   checkout: async (req, res, next) => {
@@ -76,13 +138,13 @@ export default {
     const limit = req.query.limit || 2;
     const status = req.query.status || null;
 
-    const junctionBox = {
-      new: { createdAt: 1 },
-      old: { createdAt: -1 },
-      price: { totalPrice: 1 },
-    };
+    // const junctionBox = {
+    //   new: { createdAt: 1 },
+    //   old: { createdAt: -1 },
+    //   price: { totalPrice: 1 },
+    // };
 
-    let x = req.query.sort || null;
+    // let x = req.query.sort || null;
 
     const findOption = {
       userId: String(thisUser._id),
@@ -95,18 +157,22 @@ export default {
     const [total, result] = await Promise.all([
       Invoice.find(findOption).countDocuments(),
       Invoice.find(findOption)
-        .sort(junctionBox[x] || { createdAt: 1 })
+        // .sort(junctionBox[x] || { createdAt: 1 })
         .skip(page * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
     ]);
+
+    const result2 = await serializeInvoice(result);
 
     res.status(200).json({
       data: {
         total,
-        result,
+        result: result2,
       },
     });
   },
+
   getAllInvoicesByAdmin: async (req, res, next) => {
     await authorizeAdmin(req.user);
     const page = req.query.page || 0;
@@ -123,13 +189,16 @@ export default {
       Invoice.find(findOption).countDocuments(),
       Invoice.find(findOption)
         .skip(page * limit)
-        .limit(limit),
+        .limit(limit)
+        .lean(),
     ]);
+    console.log("//////////////////////////////", result);
 
+    const result2 = await serializeInvoice(result);
     res.status(200).json({
       data: {
         total,
-        result,
+        result: result2,
       },
     });
   },
@@ -139,27 +208,31 @@ export default {
     const junctionBox = {
       user: async () => {
         const [SingleInvoice] = await Promise.all([
-          Invoice.findById(req.params._id),
+          Invoice.findById(req.params._id).lean(),
         ]);
 
         if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
 
-        if (SingleInvoice.userId !== String(thisUser._id))
+        if (SingleInvoice.userId !== String(requester._id))
           throw new AppError("forbidden", 403);
 
+        const data = await serializeSingleInvoide(SingleInvoice);
+
         res.status(200).json({
-          data: SingleInvoice,
+          data,
         });
       },
       admin: async () => {
         const [SingleInvoice] = await Promise.all([
-          Invoice.findById(req.params._id),
+          Invoice.findById(req.params._id).lean(),
         ]);
 
         if (!SingleInvoice) throw new AppError("no such invoivce exists!", 404);
 
+        const data = await serializeSingleInvoide(SingleInvoice);
+
         res.status(200).json({
-          data: SingleInvoice,
+          data,
         });
       },
     };
@@ -178,6 +251,7 @@ export default {
       Invoice.findOne({ _id: req.body.InvoiceId, status: "paid" }),
       authorizeAdmin(req.user, "boxing"),
     ]);
+
     if (!thisInvoice) throw new AppError("no such invoice found", 404);
 
     await Invoice.findByIdAndUpdate(thisInvoice._id, {
@@ -189,5 +263,41 @@ export default {
     });
 
     res.status(200).json({ msg: "ok" });
+  },
+
+  sendOrder: async (req, res, next) => {
+    const [thisAdmin, thisInvoice, thisShipper] = await Promise.all([
+      authorizeAdmin(req.user, "sending"),
+      Invoice.findOne({ _id: req.body.InvoiceId, status: "boxed" }),
+      User.findById(req.body.shipperId),
+    ]);
+
+    if (!thisInvoice) throw new AppError("no such invoice found", 404);
+    if (!thisShipper) throw new AppError("no such shipper found", 404);
+
+    if (!thisShipper.permissions.some((item) => item == "shipping"))
+      throw new AppError(
+        "the selected shipper has not permision to ship invoices",
+        400
+      );
+
+    const thisShipment = await Shipment.create({
+      invoiceId: String(thisInvoice._id),
+      shipper: String(thisShipper._id),
+      code: generateNumericString(4),
+    });
+
+    await Invoice.findByIdAndUpdate(thisInvoice._id, {
+      $set: {
+        status: "sent",
+        sender: String(thisAdmin._id),
+        sendDate: new Date().toISOString(),
+        shipment: String(thisShipment._id),
+      },
+    });
+
+    res.status.json({
+      msg: "ok",
+    });
   },
 };

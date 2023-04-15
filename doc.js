@@ -536,13 +536,19 @@ const endpoints = [
 
     body: {
       invoiceId: String,
+      shipperId: String,
     },
 
     possibleErrors: [
       {
         error: "forbidden",
       },
-      { error: "no such invoice found" },
+      {
+        error: "no such invoice found",
+      },
+      {
+        error: "the provided shipper doesnt exist",
+      },
     ],
     response: {
       msg: "ok",

@@ -13,6 +13,7 @@ const InvoiceSchema = Schema(
     ],
     totalPrice: Number,
     addressId: String,
+    
     status: {
       type: String,
       enum: ["paid", "boxed", "sent", "delivered"],
